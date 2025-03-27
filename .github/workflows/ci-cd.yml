@@ -26,7 +26,7 @@ jobs:
         run: sudo apt update && sudo apt install -y ansible
 
       - name: Install Kubernetes Python module
-        run: apt install python3-kubernetes
+        run: sudo apt install python3-kubernetes
 
       - name: Ansible Deploy
         run: ansible-playbook k8s_deploy.yml
