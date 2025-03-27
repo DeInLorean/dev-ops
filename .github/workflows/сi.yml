@@ -11,4 +11,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run tests
-        run: pytest
+        run: |
+         START=$(date +%s)
+         pytest
+         END=$(date +%s)
+         echo "Testing took $((END-START)) seconds"
+         
