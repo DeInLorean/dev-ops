@@ -26,4 +26,5 @@ jobs:
         run: sudo apt update && sudo apt install -y ansible
 
       - name: Ansible Deploy
-        run: ansible-playbook deploy.yml
+        run: ansible-playbook k8s_deploy.yml
+
