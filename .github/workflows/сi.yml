@@ -3,82 +3,20 @@ name: Deploy MyApp
 on: [push]
 
 jobs:
-  installation: 
+  build:
     runs-on: ubuntu-latest
-    steps: 
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-  test:
-    runs-on: ubuntu-latest
-    needs: [installation]
+    container: deinlorean/custom-image
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-
-      - name: Restore cached dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-      
-      - name: Install dependencies
-        run: pip install -r requirements.txt
 
       - name: Run tests
         run: pytest
 
-  lint:
-    runs-on: ubuntu-latest
-    needs: [installation]
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: Restore cached dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-      
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run linter
-        run: flake8 .
-
-  build:
-    runs-on: ubuntu-latest
-    needs: [test, lint] 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: Restore cached dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-      
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
       - name: Login to DockerHub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/myapp:latest --build-arg SECRET_KEY=${{ secrets.MY_SECRET_KEY }} .
-
-      - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/myapp:latest
+      - name: Build and Push Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/myapp:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/myapp:latest
