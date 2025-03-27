@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Deploy Infrastructure
 
 on:
   push:
@@ -8,13 +8,22 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Build with Maven
-        run: mvn clean install
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
 
-      - name: Deploy
-        run: echo "Deployment completed."
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      - name: Install Ansible
+        run: sudo apt update && sudo apt install -y ansible
+
+      - name: Ansible Deploy
+        run: ansible-playbook deploy.yml
